@@ -25,8 +25,6 @@ func getHome(c *gin.Context){
 }
 func main() {
     router := gin.Default()
-
-    // new `GET /users` route associated with our `getUsers` function
     router.GET("/users", getUsers);
 	
 	router.GET("/", getHome);
