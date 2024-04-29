@@ -3,9 +3,10 @@ package controller
 import (
 	"net/http"
 	"web/go-cat-match/database"
+	"web/go-cat-match/utils/jwt"
+	"web/go-cat-match/utils/password"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginRequest struct {
@@ -39,17 +40,25 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
+	hashedPassword := password.Hash(req.Password)
 
-	_, err = database.DB.Exec("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", req.Name, req.Email, string(hashedPassword))
+	var UserId uint64
+	err := database.DB.QueryRow("INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id", req.Name, req.Email, hashedPassword).Scan(&UserId)
+
+	//TODO: HANDLE EMAIL UNIQUE VALIDATION (409)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": req})
+
+	accessToken := jwt.Generate(&jwt.TokenPayload{
+		UserId: UserId,
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully", "data": gin.H{
+		"email":       req.Email,
+		"name":        req.Name,
+		"accessToken": accessToken,
+	}})
 }
