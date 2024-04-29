@@ -1,33 +1,17 @@
-package main
-
+package router
 
 import (
-    "net/http"
-    "github.com/gin-gonic/gin"
+	"net/http"
+	"web/go-cat-match/controller"
+
+	"github.com/gin-gonic/gin"
 )
 
-type user struct {
-    Id        int     `json:"id"`
-    Username  string  `json:"username"`
-}
+func SetupRouter(r *gin.Engine) {
+	r.GET("/v1/login", controller.Login)
+	r.POST("/v1/register", controller.Register)
 
-var users = []user{
-    {Id: 546, Username: "John"},
-    {Id: 894, Username: "Mary"},
-    {Id: 326, Username: "Jane"},
-}
-
-func getUsers(c *gin.Context) {
-    c.IndentedJSON(http.StatusOK, users)
-}
-func getHome(c *gin.Context){
-	c.String(http.StatusOK, "hello world")
-}
-func main() {
-    router := gin.Default()
-    router.GET("/users", getUsers);
-	
-	router.GET("/", getHome);
-
-    router.Run("localhost:8080")
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello World!")
+	})
 }
