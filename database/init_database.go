@@ -11,7 +11,8 @@ var DB *sql.DB
 
 func Init() {
 	var err error
-	DB, err = sql.Open("postgres", "postgres:password@localhost:5432/catmatchdb")
+
+	DB, err = sql.Open("postgres", "host=localhost port=5432 user=postgres password=password dbname=catmatchdb sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
