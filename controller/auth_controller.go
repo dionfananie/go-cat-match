@@ -10,7 +10,8 @@ import (
 )
 
 type LoginRequest struct {
-	Email string `json:"email" binding:"required,email"`
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=5,max=15"`
 }
 
 type RegisterRequest struct {
@@ -28,8 +29,32 @@ func Login(c *gin.Context) {
 	}
 
 	//TODO : Complete this function
+	var Name string
+	var Email string
+	var Pass string
+	println("user checking: ", req.Email)
 
-	c.JSON(http.StatusOK, gin.H{"data": req})
+	// query := "SELECT name, password as pass, email from users WHERE email = ?"
+	err := database.DB.QueryRow("SELECT name, password, email from users WHERE email = $1", req.Email).Scan(&Name, &Pass, &Email)
+
+	if err != nil {
+		println("fatal, no rows found")
+		return
+
+	}
+
+	errs := password.Verify(Pass, req.Password)
+
+	if errs != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "request doesnt pass validation"})
+		return
+
+	}
+	println("UserId", Name)
+	println("UserId", Email)
+
+	c.JSON(http.StatusOK, gin.H{"message": "User logged successfully", "data": gin.H{"email": Email,
+		"name": Name}})
 }
 
 func Register(c *gin.Context) {
