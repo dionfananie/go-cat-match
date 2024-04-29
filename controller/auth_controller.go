@@ -45,9 +45,11 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	database.DB.Exec("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", req.Name, req.Email, hashedPassword)
+	_, err = database.DB.Exec("INSERT INTO users (name, email, password) VALUES ($1, $2, $3)", req.Name, req.Email, string(hashedPassword))
 
-	//TODO : Complete this function
-
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"data": req})
 }
