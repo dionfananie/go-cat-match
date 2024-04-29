@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 	"web/go-cat-match/controller"
-
 	"github.com/gin-gonic/gin"
 )
 
