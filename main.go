@@ -11,8 +11,6 @@ func main() {
 	database.Init()
 	r := gin.Default()
 
-	// r.Use(middleware.AuthMiddleware())
-
 	router.SetupRouter(r)
 
 	r.Run("localhost:8080")
