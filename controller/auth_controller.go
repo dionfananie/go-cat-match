@@ -89,7 +89,7 @@ func Register(c *gin.Context) {
 		UserId: UserId,
 	})
 
-	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully", "data": gin.H{
+	c.JSON(http.StatusCreated, gin.H{"message": "User registered successfully", "data": gin.H{
 		"email":       req.Email,
 		"name":        req.Name,
 		"accessToken": accessToken,
