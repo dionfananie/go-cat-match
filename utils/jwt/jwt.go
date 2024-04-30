@@ -57,7 +57,7 @@ func Verify(token string) (*TokenPayload, error) {
 		return nil, err
 	}
 
-	id, ok := claims["ID"].(float64)
+	id, ok := claims["userId"].(float64)
 	if !ok {
 		return nil, errors.New("something went wrong")
 	}
