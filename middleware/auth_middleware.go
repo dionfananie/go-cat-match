@@ -10,15 +10,15 @@ import (
 
 func AuthMiddleware(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
-
+	println(tokenString)
 	if tokenString == "" {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Empty Header Authorization"})
 		return
 	}
 
 	tokenParts := strings.Split(tokenString, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": tokenString})
 		return
 	}
 
@@ -27,7 +27,7 @@ func AuthMiddleware(c *gin.Context) {
 	payload, err := jwt.Verify(token)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
