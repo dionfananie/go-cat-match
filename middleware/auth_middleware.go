@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"web/go-cat-match/utils/jwt"
@@ -12,13 +13,13 @@ func AuthMiddleware(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	println(tokenString)
 	if tokenString == "" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Empty Header Authorization"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Empty Header Authorization"})
 		return
 	}
 
 	tokenParts := strings.Split(tokenString, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": tokenString})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization Header"})
 		return
 	}
 
@@ -27,11 +28,13 @@ func AuthMiddleware(c *gin.Context) {
 	payload, err := jwt.Verify(token)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.Set("userId", payload.UserId)
+
+	fmt.Println("USER ID", payload.UserId)
 
 	c.Next()
 }
