@@ -9,13 +9,14 @@ import (
 )
 
 func SetupRouter(r *gin.Engine) {
-	r.POST("/v1/user/login", controller.Login)
-	r.POST("/v1/user/register", controller.Register)
+	r.Group("/v1")
+	r.POST("/user/login", controller.Login)
+	r.POST("/user/register", controller.Register)
 
-	r.POST("/v1/cat", middleware.AuthMiddleware, controller.RegisterCat)
-	r.GET("/v1/cat", controller.ListCat)
-	r.PUT("/v1/cat/:id", controller.EditCat)
-	r.DELETE("/v1/cat/:id", middleware.AuthMiddleware, controller.DeleteCat)
+	r.POST("/cat", middleware.AuthMiddleware, controller.RegisterCat)
+	r.GET("/cat", middleware.AuthMiddleware, controller.ListCat)
+	r.PUT("/cat/:id", middleware.AuthMiddleware, controller.EditCat)
+	r.DELETE("/cat/:id", middleware.AuthMiddleware, controller.DeleteCat)
 	// Route with auth middleware example (only user logged in can access this route)
 	// r.GET("/v1/cat", middleware.AuthMiddleware, controller.SomeMethodHere)
 

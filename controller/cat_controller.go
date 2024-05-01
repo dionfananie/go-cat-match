@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"web/go-cat-match/database"
+	"web/go-cat-match/helper"
 	"web/go-cat-match/model/cat"
 
 	"github.com/gin-gonic/gin"
@@ -82,6 +83,16 @@ func EditCat(c *gin.Context) {
 	id := c.Param("id")
 	var req cat.ListCat
 	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// query := `UPDATE cats SET name = $1`
+	if err := helper.ValidateSex(req.Sex); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := helper.ValidateRace(req.Race); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
