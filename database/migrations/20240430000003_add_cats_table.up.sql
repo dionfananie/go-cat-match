@@ -23,8 +23,7 @@ CREATE TABLE IF NOT EXISTS cats (
     imageUrls TEXT [] NOT NULL,
 	hasMatched BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	ownerId SERIAL,
-    CONSTRAINT fk_users
-      FOREIGN KEY(ownerId) 
-        REFERENCES users(id)
+	ownerId INT,
+  	FOREIGN KEY(ownerId) 
+	REFERENCES users(id)
 );
