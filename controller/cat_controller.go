@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"web/go-cat-match/database"
 	"web/go-cat-match/helper"
 	"web/go-cat-match/model/cat"
@@ -15,11 +16,8 @@ func RegisterCat(c *gin.Context) {
 	var req cat.RegisterRequest
 
 	// debugging
-	// &userId string := c.GetString("userId")
-	// if !exists {
-	// 	return
-	// }
-	// println("UserId", &userId)
+	userId := c.GetUint64("userId")
+	println("USER ID", userId)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -48,13 +46,82 @@ func RegisterCat(c *gin.Context) {
 }
 
 func ListCat(c *gin.Context) {
+	baseQuery := "SELECT name, race, sex, ageInMonth, description, imageUrls, created_at, hasMatched, id, ownerId from cats WHERE TRUE"
+	var params []interface{}
+	var conditions []string
+	var limitQuery, offsetQuery string
 
-	rows, err := database.DB.Query("SELECT name, race, sex, ageInMonth, description, imageUrls, created_at, hasMatched, id, ownerId from cats")
+	if id := c.Query("id"); id != "" {
+		conditions = append(conditions, fmt.Sprintf("id = $%d", len(params)+1))
+		params = append(params, id)
+	}
+	if sex := c.Query("sex"); sex != "" {
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, sex)
+	}
+	if race := c.Query("race"); race != "" {
+		conditions = append(conditions, fmt.Sprintf("race = $%d", len(params)+1))
+		params = append(params, race)
+	}
+	if hasMatched := c.Query("hasMatched"); hasMatched != "" {
+		conditions = append(conditions, fmt.Sprintf("hasmatched = $%d", len(params)+1))
+		fmt.Println("hasMatched", hasMatched)
+		params = append(params, hasMatched)
+	}
+	if ageInMonth := c.Query("ageInMonth"); ageInMonth != "" {
+		if ageInMonth == ">4" {
+			conditions = append(conditions, "ageinmonth > 4")
+		} else if ageInMonth == "<4" {
+			conditions = append(conditions, "ageinmonth < 4")
+		} else if ageInMonth == "4" {
+			conditions = append(conditions, "ageinmonth =- 4")
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "ageInMonth must be >4, <4 or 4"})
+			return
+		}
+	}
+	if owned := c.Query("owned"); owned != "" {
+		userId := c.GetUint64("userId")
+		if owned == "true" {
+			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+		} else {
+			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+		}
+
+		fmt.Println("conditions", conditions)
+	}
+	if search := c.Query("search"); search != "" {
+		conditions = append(conditions, fmt.Sprintf("name ILIKE $%d", len(params)+1))
+		params = append(params, "%"+search+"%")
+	}
+	if limit := c.Query("limit"); limit != "" {
+		limitQuery = fmt.Sprintf("LIMIT $%d", len(params)+1)
+		params = append(params, limit)
+	}
+	if offset := c.Query("offset"); offset != "" {
+		offsetQuery = fmt.Sprintf("OFFSET $%d", len(params)+1)
+		params = append(params, offset)
+	}
+
+	if len(conditions) > 0 {
+		baseQuery += " AND " + strings.Join(conditions, " AND ")
+	}
+
+	if limitQuery != "" {
+		baseQuery += " " + limitQuery
+	}
+
+	if offsetQuery != "" {
+		baseQuery += " " + offsetQuery
+	}
+
+	rows, err := database.DB.Query(baseQuery, params...)
 
 	if err != nil {
 		if err, ok := err.(*pq.Error); ok {
 			fmt.Println("pq error:", err.Code)
 			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -69,7 +136,6 @@ func ListCat(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		println(&catItem)
 		cats = append(cats, catItem)
 	}
 	if err := rows.Err(); err != nil {
@@ -77,8 +143,9 @@ func ListCat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "success", "data": cats})
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": cats})
 }
+
 func EditCat(c *gin.Context) {
 	id := c.Param("id")
 	var req cat.ListCat
