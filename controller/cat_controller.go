@@ -15,33 +15,29 @@ import (
 func RegisterCat(c *gin.Context) {
 	var req cat.RegisterRequest
 
-	// debugging
 	userId := c.GetUint64("userId")
-	println("USER ID", userId)
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	println(req.Name)
-	// var CatId uint64
-	// var CreatedAt string
-	// err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls)).Scan(&CatId, &CreatedAt)
-	// if err != nil {
+	var CatId uint64
+	var CreatedAt string
+	err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls, ownerId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls), userId).Scan(&CatId, &CreatedAt)
+	if err != nil {
 
-	// 	if err, ok := err.(*pq.Error); ok {
-	// 		fmt.Println("pq error:", err.Code)
-	// 		c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
-	// 	}
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
+		if err, ok := err.(*pq.Error); ok {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	// c.JSON(http.StatusCreated, gin.H{"message": "successfully add cat", "data": gin.H{
-	// 	"id":         CatId,
-	// 	"created_at": CreatedAt,
-	// }})
+	c.JSON(http.StatusCreated, gin.H{"message": "successfully add cat", "data": gin.H{
+		"id":         CatId,
+		"created_at": CreatedAt,
+	}})
 
 }
 
