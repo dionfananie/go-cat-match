@@ -17,8 +17,6 @@ func SetupRouter(r *gin.Engine) {
 	r.GET("/cat", middleware.AuthMiddleware, controller.ListCat)
 	r.PUT("/cat/:id", middleware.AuthMiddleware, controller.EditCat)
 	r.DELETE("/cat/:id", middleware.AuthMiddleware, controller.DeleteCat)
-	// Route with auth middleware example (only user logged in can access this route)
-	// r.GET("/v1/cat", middleware.AuthMiddleware, controller.SomeMethodHere)
 
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello World!")
