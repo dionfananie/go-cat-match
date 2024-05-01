@@ -1,15 +1,12 @@
 package cat
 
 import (
-	"database/sql"
-
 	"github.com/lib/pq"
 )
 
 type Sex string
 
 type Race string
-
 
 type ListCat struct {
 	Name        string
@@ -21,5 +18,5 @@ type ListCat struct {
 	CreatedAt   string
 	HasMatched  bool
 	Id          string
-	OwnerId     sql.NullString
+	OwnerId     int64
 }
