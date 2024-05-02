@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"web/go-cat-match/database"
 	"web/go-cat-match/model/auth"
@@ -78,7 +77,6 @@ func Register(c *gin.Context) {
 	if err != nil {
 
 		if err, ok := err.(*pq.Error); ok {
-			fmt.Println("pq error:", err.Code)
 			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

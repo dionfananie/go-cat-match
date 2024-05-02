@@ -9,18 +9,18 @@ import (
 )
 
 func SetupRouter(r *gin.Engine) {
-	r.Group("/v1")
-	r.POST("/user/login", controller.Login)
-	r.POST("/user/register", controller.Register)
-
-	r.POST("/cat", middleware.AuthMiddleware, controller.RegisterCat)
-	r.GET("/cat", middleware.AuthMiddleware, controller.ListCat)
-	r.PUT("/cat/:id", middleware.AuthMiddleware, controller.EditCat)
-	r.DELETE("/cat/:id", middleware.AuthMiddleware, controller.DeleteCat)
+	router := r.Group("/v1")
+	router.POST("/user/login", controller.Login)
+	router.POST("/user/register", controller.Register)
+	router.Use(middleware.AuthMiddleware())
+	router.POST("/cat", controller.RegisterCat)
+	router.GET("/cat", controller.ListCat)
+	router.PUT("/cat/:id", controller.EditCat)
+	router.DELETE("/cat/:id", controller.DeleteCat)
 	// Route with auth middleware example (only user logged in can access this route)
-	// r.GET("/v1/cat", middleware.AuthMiddleware, controller.SomeMethodHere)
+	// router.GET("/v1/cat", middleware.AuthMiddleware, controller.SomeMethodHere)
 
-	r.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello World!")
 	})
 }
