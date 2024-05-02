@@ -110,7 +110,7 @@ func ListCat(c *gin.Context) {
 	if offsetQuery != "" {
 		baseQuery += " " + offsetQuery
 	}
-
+	println(baseQuery)
 	rows, err := database.DB.Query(baseQuery, params...)
 
 	if err != nil {
@@ -143,23 +143,64 @@ func ListCat(c *gin.Context) {
 }
 
 func EditCat(c *gin.Context) {
-	id := c.Param("id")
+	// id := c.Param("id")
 	var req cat.ListCat
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// query := `UPDATE cats SET name = $1`
-	if err := helper.ValidateSex(req.Sex); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
 
-	if err := helper.ValidateRace(req.Race); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+	baseQuery := "UPDATE cats SET "
+	var params []interface{}
+	var conditions []string
+	if req.Name != "" {
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, req.Name)
+
 	}
-	res, err := database.DB.Exec("UPDATE cats SET name = $1, sex = $2, race = $3, description = $4, ageInMonth = $5, imageUrls = $6 WHERE id = $7", req.Name, req.Sex, req.Race, req.Description, req.AgeInMonth, req.ImageUrls, id)
+	if req.AgeInMonth != "" {
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, req.AgeInMonth)
+
+	}
+	if req.Description != "" {
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, req.Description)
+
+	}
+	if len(req.ImageUrls) > 0 {
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, pq.Array(req.ImageUrls))
+
+	}
+	if req.Race != "" {
+		if err := helper.ValidateRace(req.Race); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		conditions = append(conditions, fmt.Sprintf("race = $%d", len(params)+1))
+		params = append(params, req.Race)
+
+	}
+	if req.Sex != "" {
+		if err := helper.ValidateSex(req.Sex); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		params = append(params, req.Sex)
+	}
+	// if req.HasMatched != "" {
+	// 	conditions = append(conditions, fmt.Sprintf("hasmatched = $%d", len(params)+1))
+	// 	fmt.Println("hasMatched", req.HasMatched)
+	// 	params = append(params, req.HasMatched)
+	// }
+
+	if len(conditions) > 0 {
+		baseQuery = baseQuery + strings.Join(conditions, ", ")
+	}
+	println(baseQuery)
+	res, err := database.DB.Exec(baseQuery, params...)
 
 	if err != nil {
 		if err, ok := err.(*pq.Error); ok {
