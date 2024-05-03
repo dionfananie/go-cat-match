@@ -12,13 +12,18 @@ func SetupRouter(r *gin.Engine) {
 	router := r.Group("/v1")
 	router.POST("/user/login", controller.Login)
 	router.POST("/user/register", controller.Register)
+
 	router.Use(middleware.AuthMiddleware())
 	router.POST("/cat", controller.RegisterCat)
 	router.GET("/cat", controller.ListCat)
 	router.PUT("/cat/:id", controller.EditCat)
 	router.DELETE("/cat/:id", controller.DeleteCat)
-	// Route with auth middleware example (only user logged in can access this route)
-	// router.GET("/v1/cat", middleware.AuthMiddleware, controller.SomeMethodHere)
+
+	router.POST("/cat/match/approve", controller.ApproveMatch)
+	router.POST("/cat/match/reject", controller.RejectMatch)
+	router.DELETE("/cat/match/:id", controller.DeleteMatch)
+	router.POST("/cat/match", controller.MatchCat)
+	router.GET("/cat/match", controller.ListMatch)
 
 	router.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello World!")

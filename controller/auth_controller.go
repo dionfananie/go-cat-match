@@ -75,7 +75,6 @@ func Register(c *gin.Context) {
 	var UserId uint64
 	err = database.DB.QueryRow("INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id", req.Name, req.Email, hashedPassword).Scan(&UserId)
 	if err != nil {
-
 		if err, ok := err.(*pq.Error); ok {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
 		}
