@@ -17,6 +17,8 @@ func RegisterCat(c *gin.Context) {
 
 	userId := c.GetUint64("userId")
 
+	println("userId", userId)
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

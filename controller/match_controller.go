@@ -7,6 +7,7 @@ import (
 	"web/go-cat-match/model/match"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 )
 
 func MatchCat(c *gin.Context) {
@@ -19,17 +20,77 @@ func MatchCat(c *gin.Context) {
 	//TODO: VALIDATE THERE IS A CAT WITH ID MATCHCATID AND USERCATID
 	//TODO: VALIDATE USERCATID IS BELONGS TO THE USER
 
+	var OwnerId uint64
+	var Sex string
+	var HasMatched bool
+	var OwnerIdUser uint64
+	var SexUser string
+	var HasMatchedUser bool
 	userId := c.GetUint64("userId")
-	matchStatus := "pending"
-	_, err := database.DB.Exec("INSERT INTO matches (match_cat_id, user_cat_id, issued_user_id, message, status) VALUES ($1, $2, $3, $4)", request.MatchCatId, request.UserCatId, userId, request.Message, matchStatus)
+	// findout cat target
+	baseQuery := fmt.Sprintf("SELECT sex, hasMatched, ownerId from cats WHERE id = %v", request.MatchCatId)
+	println("query: ", baseQuery)
+	err := database.DB.QueryRow(baseQuery).Scan(&Sex, &HasMatched, &OwnerId)
+	if err != nil {
+
+		if err, ok := err.(*pq.Error); ok {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	// findout cat user
+	baseQuery = fmt.Sprintf("SELECT sex, hasMatched, ownerId from cats WHERE id = %v", request.UserCatId)
+	err = database.DB.QueryRow(baseQuery).Scan(&SexUser, &HasMatchedUser, &OwnerIdUser)
+	if err != nil {
+
+		if err, ok := err.(*pq.Error); ok {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	if userId != OwnerIdUser {
+		c.JSON(http.StatusNotFound, gin.H{"error": "This cat is not belong to user"})
+		return
+	}
+	if OwnerId == OwnerIdUser {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "The cats has the same owner"})
+		return
+	}
+	if Sex == SexUser {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cat has same sex"})
+		return
+	}
+	if HasMatched {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cat is already matched"})
+		return
+	}
+
+	baseQuery = fmt.Sprintf("UPDATE cats SET hasMatched = true WHERE id IN (%d , %d)", request.MatchCatId, request.UserCatId)
+	res, err := database.DB.Exec(baseQuery)
+	if err != nil {
+
+		if err, ok := err.(*pq.Error); ok {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+		}
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	fmt.Println(request)
+	if rowsAffected == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Matched successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": gin.H{"message": "Successfully matching your cat!"}})
 }
 
 func ListMatch(c *gin.Context) {
