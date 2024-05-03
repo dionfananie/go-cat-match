@@ -143,7 +143,6 @@ func ListCat(c *gin.Context) {
 }
 
 func EditCat(c *gin.Context) {
-	// id := c.Param("id")
 	var req cat.ListCat
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -154,22 +153,22 @@ func EditCat(c *gin.Context) {
 	var params []interface{}
 	var conditions []string
 	if req.Name != "" {
-		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		conditions = append(conditions, fmt.Sprintf("name = $%d", len(params)+1))
 		params = append(params, req.Name)
 
 	}
 	if req.AgeInMonth != "" {
-		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		conditions = append(conditions, fmt.Sprintf("ageInMonth = $%d", len(params)+1))
 		params = append(params, req.AgeInMonth)
 
 	}
 	if req.Description != "" {
-		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		conditions = append(conditions, fmt.Sprintf("description = $%d", len(params)+1))
 		params = append(params, req.Description)
 
 	}
 	if len(req.ImageUrls) > 0 {
-		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
+		conditions = append(conditions, fmt.Sprintf("imageUrls = $%d", len(params)+1))
 		params = append(params, pq.Array(req.ImageUrls))
 
 	}
@@ -190,11 +189,11 @@ func EditCat(c *gin.Context) {
 		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
 		params = append(params, req.Sex)
 	}
-	// if req.HasMatched != "" {
-	// 	conditions = append(conditions, fmt.Sprintf("hasmatched = $%d", len(params)+1))
-	// 	fmt.Println("hasMatched", req.HasMatched)
-	// 	params = append(params, req.HasMatched)
-	// }
+	if req.HasMatched {
+		conditions = append(conditions, fmt.Sprintf("hasmatched = $%d", len(params)+1))
+		fmt.Println("hasMatched", req.HasMatched)
+		params = append(params, req.HasMatched)
+	}
 
 	if len(conditions) > 0 {
 		baseQuery = baseQuery + strings.Join(conditions, ", ")
