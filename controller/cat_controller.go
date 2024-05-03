@@ -143,10 +143,15 @@ func ListCat(c *gin.Context) {
 }
 
 func EditCat(c *gin.Context) {
+	id := c.Param("id")
 	var req cat.ListCat
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "parameter required"})
 	}
 
 	baseQuery := "UPDATE cats SET "
@@ -198,6 +203,9 @@ func EditCat(c *gin.Context) {
 	if len(conditions) > 0 {
 		baseQuery = baseQuery + strings.Join(conditions, ", ")
 	}
+
+	baseQuery = baseQuery + " WHERE id = " + id
+
 	println(baseQuery)
 	res, err := database.DB.Exec(baseQuery, params...)
 
@@ -226,7 +234,6 @@ func EditCat(c *gin.Context) {
 
 func DeleteCat(c *gin.Context) {
 	id := c.Param("id")
-	println("id", id)
 
 	rows, err := database.DB.Exec("DELETE FROM cats WHERE id = $1", id)
 
