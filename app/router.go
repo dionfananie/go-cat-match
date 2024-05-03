@@ -9,6 +9,9 @@ import (
 )
 
 func SetupRouter(r *gin.Engine) {
+	r.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "Hello World!")
+	})
 	router := r.Group("/v1")
 	router.POST("/user/login", controller.Login)
 	router.POST("/user/register", controller.Register)
@@ -25,7 +28,4 @@ func SetupRouter(r *gin.Engine) {
 	router.POST("/cat/match", controller.MatchCat)
 	router.GET("/cat/match", controller.ListMatch)
 
-	router.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Hello World!")
-	})
 }
