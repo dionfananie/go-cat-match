@@ -229,7 +229,7 @@ func EditCat(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": " successfully update cat"})
+	c.JSON(http.StatusOK, gin.H{"message": "successfully update cat"})
 }
 
 func DeleteCat(c *gin.Context) {
