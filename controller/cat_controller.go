@@ -86,6 +86,11 @@ func ListCat(c *gin.Context) {
 			age, _ := strconv.Atoi(ageInMonth)
 			conditions = append(conditions, fmt.Sprintf("ageinmonth < $%d", len(params)+1))
 			params = append(params, age)
+		} else if strings.HasPrefix(ageInMonth, "=") {
+			ageInMonth = strings.TrimPrefix(ageInMonth, "=")
+			age, _ := strconv.Atoi(ageInMonth)
+			conditions = append(conditions, fmt.Sprintf("ageinmonth = $%d", len(params)+1))
+			params = append(params, age)
 		} else {
 			age, _ := strconv.Atoi(ageInMonth)
 			conditions = append(conditions, fmt.Sprintf("ageinmonth = $%d", len(params)+1))
@@ -98,7 +103,7 @@ func ListCat(c *gin.Context) {
 			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
 			params = append(params, userId)
 		} else {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
+			conditions = append(conditions, fmt.Sprintf("ownerid != $%d", len(params)+1))
 			params = append(params, userId)
 		}
 	}
