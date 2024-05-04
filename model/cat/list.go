@@ -9,7 +9,7 @@ type ListCat struct {
 	Name        string         `json:"name"`
 	Race        string         `json:"race"`
 	Sex         string         `json:"sex"`
-	AgeInMonth  string         `json:"ageInMonth"`
+	AgeInMonth  int            `json:"ageInMonth"`
 	Description string         `json:"description"`
 	ImageUrls   pq.StringArray `json:"imageUrls"`
 	HasMatched  bool           `json:"hasMatched"`
