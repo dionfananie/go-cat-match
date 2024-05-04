@@ -24,11 +24,12 @@ func RegisterCat(c *gin.Context) {
 
 	var CatId uint64
 	var CreatedAt string
-	err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls, ownerId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, createdAt", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls), userId).Scan(&CatId, &CreatedAt)
-	if err != nil {
+	err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls, ownerId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, createdat", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls), userId).Scan(&CatId, &CreatedAt)
 
+	if err != nil {
 		if err, ok := err.(*pq.Error); ok {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
