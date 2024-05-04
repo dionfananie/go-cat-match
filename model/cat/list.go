@@ -5,14 +5,14 @@ import (
 )
 
 type ListCat struct {
-	Name        string
-	Race        string
-	Sex         string
-	AgeInMonth  string
-	Description string
-	ImageUrls   pq.StringArray
-	CreatedAt   string
-	HasMatched  bool
-	Id          string
-	OwnerId     int64
+	Id          string         `json:"id"`
+	Name        string         `json:"name"`
+	Race        string         `json:"race"`
+	Sex         string         `json:"sex"`
+	AgeInMonth  string         `json:"ageInMonth"`
+	Description string         `json:"description"`
+	ImageUrls   pq.StringArray `json:"imageUrls"`
+	HasMatched  bool           `json:"hasMatched"`
+	OwnerId     int64          `json:"ownerId"`
+	CreatedAt   string         `json:"createdAt"`
 }
