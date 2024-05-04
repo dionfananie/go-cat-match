@@ -95,17 +95,56 @@ func MatchCat(c *gin.Context) {
 
 func ListMatch(c *gin.Context) {
 	userId := c.GetUint64("userId")
-	rows, err := database.DB.Query("SELECT id, match_cat_id, user_cat_id, message, created_at from matches WHERE issued_user_id = $1", userId)
+	query := `SELECT m.id, m.message, m.created_at,
+				
+				u.id as issued_user_id, u.name as issued_user_name, u.created_at as issued_user_created_at, 
+				
+				uc.id as user_cat_id, uc.name as user_cat_name, uc.race as user_cat_race, uc.sex as user_cat_sex,
+				uc.description as user_cat_description, uc.ageinmonth as user_cat_age_in_month, uc.imageurls as user_cat_image_urls,
+				
+				mc.id as user_cat_id, mc.name as user_cat_name, mc.race as user_cat_race, mc.sex as user_cat_sex,
+				mc.description as user_cat_description, mc.ageinmonth as user_cat_age_in_month, mc.imageurls as user_cat_image_urls
+				
+				FROM matches m
+				JOIN users u ON m.issued_user_id = u.id
+				JOIN cats uc ON m.user_cat_id = uc.id
+				JOIN cats mc ON m.match_cat_id = mc.id
+				WHERE m.issued_user_id = $1`
+	rows, err := database.DB.Query(query, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer rows.Close()
 
-	var matchs []match.Match
+	var matchs []match.MatchFullInfo
 	for rows.Next() {
-		var match match.Match
-		if err := rows.Scan(&match.Id, &match.MatchCatId, &match.UserCatId, &match.Message, &match.CreatedAt); err != nil {
+		var match match.MatchFullInfo
+		if err := rows.Scan(
+			&match.Id,
+			&match.Message,
+			&match.CreatedAt,
+
+			&match.IssuedBy.Id,
+			&match.IssuedBy.Name,
+			&match.IssuedBy.CreatedAt,
+
+			&match.UserCatDetail.Id,
+			&match.UserCatDetail.Name,
+			&match.UserCatDetail.Race,
+			&match.UserCatDetail.Sex,
+			&match.UserCatDetail.Description,
+			&match.UserCatDetail.AgeInMonth,
+			&match.UserCatDetail.ImageUrls,
+
+			&match.MatchCatDetail.Id,
+			&match.MatchCatDetail.Name,
+			&match.MatchCatDetail.Race,
+			&match.MatchCatDetail.Sex,
+			&match.MatchCatDetail.Description,
+			&match.MatchCatDetail.AgeInMonth,
+			&match.MatchCatDetail.ImageUrls,
+		); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -115,8 +154,6 @@ func ListMatch(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	//TODO: ADD ISSUEDUSER, CATMATCHDETAIL, AND CATUSERDETAIL TO THE RESPONSE
 
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": matchs})
 
