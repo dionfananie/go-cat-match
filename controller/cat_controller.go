@@ -90,9 +90,9 @@ func ListCat(c *gin.Context) {
 	if owned := c.Query("owned"); owned != "" {
 		userId := c.GetUint64("userId")
 		if owned == "true" {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+			conditions = append(conditions, fmt.Sprintf("ownerid = %d", userId))
 		} else {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+			conditions = append(conditions, fmt.Sprintf("ownerid = %d", userId))
 		}
 
 		fmt.Println("conditions", conditions)
