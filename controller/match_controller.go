@@ -33,7 +33,8 @@ func MatchCat(c *gin.Context) {
 
 	defer rows.Close()
 
-	var cats []cat.ListCat
+	var catUser cat.ListCat
+	var catMatcher cat.ListCat
 
 	for rows.Next() {
 		var catItem cat.ListCat
@@ -41,14 +42,15 @@ func MatchCat(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		cats = append(cats, catItem)
+
+		if uint64(catItem.OwnerId) == userId {
+			catUser = catItem
+		} else {
+			catMatcher = catItem
+		}
 	}
 
-	var catUser, catMatcher cat.ListCat
-	catUser = cats[0]
-	catMatcher = cats[1]
-
-	if uint64(catUser.OwnerId) != userId {
+	if uint64(catUser.OwnerId) == userId && uint64(catMatcher.OwnerId) == userId {
 		c.JSON(http.StatusNotFound, gin.H{"error": "This cat is not belong to user"})
 		return
 	}
