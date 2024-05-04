@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS cats (
     name VARCHAR(50) NOT NULL,
     race race NOT NULL,
     sex sex NOT NULL,
-    ageInMonth SMALLINT NOT NULL,
+    ageInMonth INT NOT NULL,
     description VARCHAR(200) NOT NULL,
     imageUrls TEXT [] NOT NULL,
 	hasMatched BOOLEAN NOT NULL DEFAULT false,
