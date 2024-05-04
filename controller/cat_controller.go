@@ -54,10 +54,20 @@ func ListCat(c *gin.Context) {
 		params = append(params, id)
 	}
 	if sex := c.Query("sex"); sex != "" {
+		err := helper.ValidateSex(sex)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		conditions = append(conditions, fmt.Sprintf("sex = $%d", len(params)+1))
 		params = append(params, sex)
 	}
 	if race := c.Query("race"); race != "" {
+		err := helper.ValidateRace(race)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		conditions = append(conditions, fmt.Sprintf("race = $%d", len(params)+1))
 		params = append(params, race)
 	}

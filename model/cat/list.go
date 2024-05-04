@@ -4,14 +4,10 @@ import (
 	"github.com/lib/pq"
 )
 
-type Sex string
-
-type Race string
-
 type ListCat struct {
 	Name        string
-	Race        Race
-	Sex         Sex
+	Race        string
+	Sex         string
 	AgeInMonth  string
 	Description string
 	ImageUrls   pq.StringArray
