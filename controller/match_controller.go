@@ -115,7 +115,7 @@ func ListMatch(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var matchs []match.MatchFullInfo
+	matchs := make([]match.MatchFullInfo, 0)
 	for rows.Next() {
 		var match match.MatchFullInfo
 		if err := rows.Scan(
