@@ -141,7 +141,8 @@ func ListCat(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var cats []cat.ListCat
+	cats := make([]cat.ListCat, 0)
+
 	for rows.Next() {
 		var catItem cat.ListCat
 		if err := rows.Scan(&catItem.Name, &catItem.Race, &catItem.Sex, &catItem.AgeInMonth, &catItem.Description, &catItem.ImageUrls, &catItem.CreatedAt,

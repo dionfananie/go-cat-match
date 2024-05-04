@@ -5,7 +5,7 @@ import (
 )
 
 type ListCat struct {
-	Id          string         `json:"id"`
+	Id          int64          `json:"id"`
 	Name        string         `json:"name"`
 	Race        string         `json:"race"`
 	Sex         string         `json:"sex"`
