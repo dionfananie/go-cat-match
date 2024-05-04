@@ -1,6 +1,6 @@
-CREATE TYPE sex as ENUM('male', 'female');
+CREATE TYPE sex_type as ENUM('male', 'female');
 
-CREATE TYPE race AS ENUM(
+CREATE TYPE race_type AS ENUM(
     'Maine Coon',
     'Persian',
     'Ragdoll',
@@ -16,8 +16,8 @@ CREATE TYPE race AS ENUM(
 CREATE TABLE IF NOT EXISTS cats (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    race race NOT NULL,
-    sex sex NOT NULL,
+    race race_type NOT NULL,
+    sex sex_type NOT NULL,
     ageInMonth INT NOT NULL,
     description VARCHAR(200) NOT NULL,
     imageUrls TEXT [] NOT NULL,
