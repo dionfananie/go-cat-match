@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS cats (
     description VARCHAR(200) NOT NULL,
     imageUrls TEXT [] NOT NULL,
 	hasMatched BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	ownerId INT,
   	FOREIGN KEY(ownerId) 
 	REFERENCES users(id)
