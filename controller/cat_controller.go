@@ -26,7 +26,7 @@ func RegisterCat(c *gin.Context) {
 
 	var CatId uint64
 	var CreatedAt string
-	err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls, ownerId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls), userId).Scan(&CatId, &CreatedAt)
+	err := database.DB.QueryRow("INSERT INTO cats (name, race, sex, ageInMonth, description, imageUrls, ownerId) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, createdAt", req.Name, req.Race, req.Sex, req.AgeInMonth, req.Description, pq.Array(req.ImageUrls), userId).Scan(&CatId, &CreatedAt)
 	if err != nil {
 
 		if err, ok := err.(*pq.Error); ok {
@@ -37,14 +37,14 @@ func RegisterCat(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "successfully add cat", "data": gin.H{
-		"id":         CatId,
-		"created_at": CreatedAt,
+		"id":        CatId,
+		"createdAt": CreatedAt,
 	}})
 
 }
 
 func ListCat(c *gin.Context) {
-	baseQuery := "SELECT name, race, sex, ageInMonth, description, imageUrls, created_at, hasMatched, id, ownerId from cats WHERE TRUE"
+	baseQuery := "SELECT name, race, sex, ageInMonth, description, imageUrls, createdAt, hasMatched, id, ownerId from cats WHERE TRUE"
 	var params []interface{}
 	var conditions []string
 	var limitQuery, offsetQuery string

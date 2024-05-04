@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS matches (
     user_cat_id BIGINT,
     match_cat_id BIGINT,
     message VARCHAR(125),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -93,9 +93,9 @@ func MatchCat(c *gin.Context) {
 
 func ListMatch(c *gin.Context) {
 	userId := c.GetUint64("userId")
-	query := `SELECT m.id, m.message, m.created_at,
+	query := `SELECT m.id, m.message, m.createdAt,
 				
-				u.id as issued_user_id, u.name as issued_user_name, u.created_at as issued_user_created_at, 
+				u.id as issued_user_id, u.name as issued_user_name, u.createdAt as issued_user_createdAt, 
 				
 				uc.id as user_cat_id, uc.name as user_cat_name, uc.race as user_cat_race, uc.sex as user_cat_sex,
 				uc.description as user_cat_description, uc.ageinmonth as user_cat_age_in_month, uc.imageurls as user_cat_image_urls,
