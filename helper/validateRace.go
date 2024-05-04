@@ -2,23 +2,22 @@ package helper
 
 import (
 	"errors"
-	"web/go-cat-match/model/cat"
 )
 
 const (
-	PERSIAN    cat.Race = "Persian"
-	MAINE_COON cat.Race = "Maine Coon"
-	SIAMESE    cat.Race = "Siamese"
-	RAGDOLL    cat.Race = "Ragdoll"
-	BENGAL     cat.Race = "Bengal"
-	SPHYNX     cat.Race = "Sphynx"
-	BRITISH    cat.Race = "British Shorthair"
-	ABYSSINIAN cat.Race = "Abyssinian"
-	SCOTTISH   cat.Race = "Scottish Fold"
-	BIRMAN     cat.Race = "Birman"
+	PERSIAN    string = "Persian"
+	MAINE_COON string = "Maine Coon"
+	SIAMESE    string = "Siamese"
+	RAGDOLL    string = "Ragdoll"
+	BENGAL     string = "Bengal"
+	SPHYNX     string = "Sphynx"
+	BRITISH    string = "British Shorthair"
+	ABYSSINIAN string = "Abyssinian"
+	SCOTTISH   string = "Scottish Fold"
+	BIRMAN     string = "Birman"
 )
 
-func ValidateRace(status cat.Race) error {
+func ValidateRace(status string) error {
 	switch status {
 	case PERSIAN, MAINE_COON,
 		SIAMESE,
@@ -31,6 +30,6 @@ func ValidateRace(status cat.Race) error {
 		BIRMAN:
 		return nil
 	default:
-		return errors.New("invalid status")
+		return errors.New("invalid Race Type, please check your Cat's Race")
 	}
 }

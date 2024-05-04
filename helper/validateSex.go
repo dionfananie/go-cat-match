@@ -2,19 +2,18 @@ package helper
 
 import (
 	"errors"
-	"web/go-cat-match/model/cat"
 )
 
 const (
-	MALE   cat.Sex = "male"
-	FEMALE cat.Sex = "female"
+	MALE   string = "male"
+	FEMALE string = "female"
 )
 
-func ValidateSex(status cat.Sex) error {
+func ValidateSex(status string) error {
 	switch status {
 	case MALE, FEMALE:
 		return nil
 	default:
-		return errors.New("invalid status")
+		return errors.New("invalid Sex Status, please check your Gender type")
 	}
 }
