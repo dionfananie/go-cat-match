@@ -43,13 +43,12 @@ func MatchCat(c *gin.Context) {
 		}
 		cats = append(cats, catItem)
 	}
-	println(userId)
 
 	var catUser, catMatcher cat.ListCat
 	catUser = cats[0]
 	catMatcher = cats[1]
 
-	if uint64(catUser.OwnerId) == userId && uint64(catMatcher.OwnerId) == userId {
+	if uint64(catUser.OwnerId) != userId {
 		c.JSON(http.StatusNotFound, gin.H{"error": "This cat is not belong to user"})
 		return
 	}
