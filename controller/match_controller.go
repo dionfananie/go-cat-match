@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"web/go-cat-match/database"
+	"web/go-cat-match/model/cat"
 	"web/go-cat-match/model/match"
 
 	"github.com/gin-gonic/gin"
@@ -17,31 +18,10 @@ func MatchCat(c *gin.Context) {
 		return
 	}
 
-	//TODO: VALIDATE THERE IS A CAT WITH ID MATCHCATID AND USERCATID
-	//TODO: VALIDATE USERCATID IS BELONGS TO THE USER
-
-	var OwnerId uint64
-	var Sex string
-	var HasMatched bool
-	var OwnerIdUser uint64
-	var SexUser string
-	var HasMatchedUser bool
 	userId := c.GetUint64("userId")
-	// findout cat target
-	baseQuery := fmt.Sprintf("SELECT sex, hasMatched, ownerId from cats WHERE id = %v", request.MatchCatId)
-	println("query: ", baseQuery)
-	err := database.DB.QueryRow(baseQuery).Scan(&Sex, &HasMatched, &OwnerId)
-	if err != nil {
 
-		if err, ok := err.(*pq.Error); ok {
-			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
-		}
-		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-		return
-	}
-	// findout cat user
-	baseQuery = fmt.Sprintf("SELECT sex, hasMatched, ownerId from cats WHERE id = %v", request.UserCatId)
-	err = database.DB.QueryRow(baseQuery).Scan(&SexUser, &HasMatchedUser, &OwnerIdUser)
+	baseQuery := fmt.Sprintf("SELECT sex, hasMatched, ownerId from cats WHERE id in (%d, %d)", request.MatchCatId, request.UserCatId)
+	rows, err := database.DB.Query(baseQuery)
 	if err != nil {
 
 		if err, ok := err.(*pq.Error); ok {
@@ -51,19 +31,37 @@ func MatchCat(c *gin.Context) {
 		return
 	}
 
-	if userId != OwnerIdUser {
+	defer rows.Close()
+
+	var cats []cat.ListCat
+
+	for rows.Next() {
+		var catItem cat.ListCat
+		if err := rows.Scan(&catItem.Sex, &catItem.HasMatched, &catItem.OwnerId); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		cats = append(cats, catItem)
+	}
+	println(userId)
+
+	var catUser, catMatcher cat.ListCat
+	catUser = cats[0]
+	catMatcher = cats[1]
+
+	if uint64(catUser.OwnerId) == userId && uint64(catMatcher.OwnerId) == userId {
 		c.JSON(http.StatusNotFound, gin.H{"error": "This cat is not belong to user"})
 		return
 	}
-	if OwnerId == OwnerIdUser {
+	if catUser.OwnerId == catMatcher.OwnerId {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "The cats has the same owner"})
 		return
 	}
-	if Sex == SexUser {
+	if catUser.Sex == catMatcher.Sex {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cat has same sex"})
 		return
 	}
-	if HasMatched {
+	if catUser.HasMatched || catMatcher.HasMatched {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cat is already matched"})
 		return
 	}
