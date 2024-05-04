@@ -17,8 +17,6 @@ func RegisterCat(c *gin.Context) {
 
 	userId := c.GetUint64("userId")
 
-	println("userId", userId)
-
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -174,7 +172,7 @@ func EditCat(c *gin.Context) {
 		params = append(params, req.Name)
 
 	}
-	if req.AgeInMonth != "" {
+	if req.AgeInMonth != 0 {
 		conditions = append(conditions, fmt.Sprintf("ageInMonth = $%d", len(params)+1))
 		params = append(params, req.AgeInMonth)
 

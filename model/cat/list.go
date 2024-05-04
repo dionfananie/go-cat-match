@@ -8,7 +8,7 @@ type ListCat struct {
 	Name        string
 	Race        string
 	Sex         string
-	AgeInMonth  string
+	AgeInMonth  int
 	Description string
 	ImageUrls   pq.StringArray
 	CreatedAt   string
