@@ -98,7 +98,7 @@ func ListCat(c *gin.Context) {
 			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
 			params = append(params, userId)
 		} else {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
+			conditions = append(conditions, fmt.Sprintf("ownerid != $%d", len(params)+1))
 			params = append(params, userId)
 		}
 	}
