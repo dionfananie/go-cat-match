@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"web/go-cat-match/database"
 	"web/go-cat-match/helper"
@@ -72,31 +73,36 @@ func ListCat(c *gin.Context) {
 	}
 	if hasMatched := c.Query("hasMatched"); hasMatched != "" {
 		conditions = append(conditions, fmt.Sprintf("hasmatched = $%d", len(params)+1))
-		fmt.Println("hasMatched", hasMatched)
 		params = append(params, hasMatched)
 	}
 	if ageInMonth := c.Query("ageInMonth"); ageInMonth != "" {
-		if ageInMonth == ">4" {
-			conditions = append(conditions, "ageinmonth > 4")
-		} else if ageInMonth == "<4" {
-			conditions = append(conditions, "ageinmonth < 4")
-		} else if ageInMonth == "4" {
-			conditions = append(conditions, "ageinmonth =- 4")
+		if strings.HasPrefix(ageInMonth, ">") {
+			ageInMonth = strings.TrimPrefix(ageInMonth, ">")
+			age, _ := strconv.Atoi(ageInMonth)
+			conditions = append(conditions, fmt.Sprintf("ageinmonth > $%d", len(params)+1))
+			params = append(params, age)
+		} else if strings.HasPrefix(ageInMonth, "<") {
+			ageInMonth = strings.TrimPrefix(ageInMonth, "<")
+			age, _ := strconv.Atoi(ageInMonth)
+			conditions = append(conditions, fmt.Sprintf("ageinmonth < $%d", len(params)+1))
+			params = append(params, age)
 		} else {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ageInMonth must be >4, <4 or 4"})
-			return
+			age, _ := strconv.Atoi(ageInMonth)
+			conditions = append(conditions, fmt.Sprintf("ageinmonth = $%d", len(params)+1))
+			params = append(params, age)
 		}
 	}
 	if owned := c.Query("owned"); owned != "" {
 		userId := c.GetUint64("userId")
 		if owned == "true" {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
+			params = append(params, userId)
 		} else {
-			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", userId))
+			conditions = append(conditions, fmt.Sprintf("ownerid = $%d", len(params)+1))
+			params = append(params, userId)
 		}
-
-		fmt.Println("conditions", conditions)
 	}
+
 	if search := c.Query("search"); search != "" {
 		conditions = append(conditions, fmt.Sprintf("name ILIKE $%d", len(params)+1))
 		params = append(params, "%"+search+"%")
@@ -121,13 +127,13 @@ func ListCat(c *gin.Context) {
 	if offsetQuery != "" {
 		baseQuery += " " + offsetQuery
 	}
-	println(baseQuery)
+
 	rows, err := database.DB.Query(baseQuery, params...)
 
 	if err != nil {
 		if err, ok := err.(*pq.Error); ok {
 			fmt.Println("pq error:", err.Code)
-			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
