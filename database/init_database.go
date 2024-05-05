@@ -13,15 +13,10 @@ var DB *sql.DB
 
 func Init() {
 	var err error
-	var dbCredentials = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s %s",
-		config.DB_HOST,
-		config.DB_PORT,
-		config.DB_USERNAME,
-		config.DB_PASSWORD,
-		config.DB_NAME,
-		config.DB_PARAMS)
 
-	DB, err = sql.Open("postgres", dbCredentials)
+	uri := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?%s", config.DB_USERNAME, config.DB_PASSWORD, config.DB_HOST, config.DB_PORT, config.DB_NAME, config.DB_PARAMS)
+
+	DB, err = sql.Open("postgres", uri)
 	if err != nil {
 		log.Fatal(err)
 	}
