@@ -67,8 +67,8 @@ func MatchCat(c *gin.Context) {
 		return
 	}
 
-	baseQuery = fmt.Sprintf("UPDATE cats SET hasMatched = true WHERE id IN (%d , %d)", request.MatchCatId, request.UserCatId)
-	res, err := database.DB.Exec(baseQuery)
+	var matchesId uint64
+	err = database.DB.QueryRow("INSERT INTO matches (issued_user_id, user_cat_id, match_cat_id, status, message) VALUES ($1, $2, $3, $4, $5) RETURNING id", userId, request.UserCatId, request.MatchCatId, "pending", request.Message).Scan(&matchesId)
 	if err != nil {
 
 		if err, ok := err.(*pq.Error); ok {
@@ -78,20 +78,8 @@ func MatchCat(c *gin.Context) {
 		return
 	}
 
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	if rowsAffected == 0 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	c.JSON(http.StatusCreated, gin.H{"message": gin.H{"message": "Successfully matching your cat!"}})
 }
-
 func ListMatch(c *gin.Context) {
 	userId := c.GetUint64("userId")
 	query := `SELECT m.id, m.message, m.createdAt,
