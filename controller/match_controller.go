@@ -214,15 +214,39 @@ func RejectMatch(c *gin.Context) {
 }
 
 func DeleteMatch(c *gin.Context) {
-	// userId := c.GetUint64("userId")
+	userId := c.GetUint64("userId")
 	matchId := c.Param("id")
+	var issuedUserId uint64
 
-	//TODO: VALIDATE MATCHID IS BELONGS TO THE USER
-	//TODO: VALIDATE MATCHID STATUS IS PENDING
-
-	_, err := database.DB.Exec("DELETE FROM matches WHERE id = $1", matchId)
+	query := fmt.Sprintf("SELECT issued_user_id FROM matches WHERE id = %s", matchId)
+	err := database.DB.QueryRow(query).Scan(&issuedUserId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if issuedUserId != userId {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You are not the creator of this matching"})
+		return
+	}
+	rows, err := database.DB.Exec("DELETE FROM matches WHERE id = $1", matchId)
+	if err != nil {
+		if err, ok := err.(*pq.Error); ok {
+			fmt.Println("pq error:", err.Code)
+			c.JSON(http.StatusConflict, gin.H{"error": err.Detail})
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	rowsAffected, err := rows.RowsAffected()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if rowsAffected == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Delete Failed"})
 		return
 	}
 
