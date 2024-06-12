@@ -27,3 +27,6 @@ go run main.go
 
 Specification App
 https://openidea-projectsprint.notion.site/Cats-Social-9e7639a6a68748c38c67f81d9ab3c769
+
+Test K6
+https://github.com/dionfananie/ProjectSprintBatch2Week1TestCases
